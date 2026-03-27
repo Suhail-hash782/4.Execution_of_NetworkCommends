@@ -25,8 +25,86 @@ This commands includes
 <BR>
 • Other IP Commands e.g. show ip route etc.
 <BR>
+##Server.py
+
+```
+import socket
+import subprocess
+import platform
+
+s = socket.socket()
+s.bind(('localhost', 8000))
+s.listen(1)
+print("Server listening on port 8000...")
+c, addr = s.accept()
+print("Connected:", addr)
+
+while True:
+    command = c.recv(1024).decode().strip()
+    if not command or command.lower() == 'exit':
+        print("Client disconnected.")
+        break
+
+    try:
+        # Run ANY command the client sends
+        completed = subprocess.run(
+            command, 
+            capture_output=True, 
+            text=True, 
+            shell=True
+        )
+        output = completed.stdout + (completed.stderr or "")
+    except Exception as e:
+        output = f"Command failed: {e}"
+
+    c.sendall(output.encode('utf-8'))
+
+c.close()
+s.close()
+```
+##Client.py
+```
+import socket
+
+s = socket.socket()
+s.connect(('localhost', 8000))
+
+print("Connected. Type any network command (ipconfig, ping, etc.) or 'exit'.")
+
+while True:
+    cmd = input("Enter command: ").strip()
+    if not cmd:
+        continue
+
+    s.send(cmd.encode('utf-8'))
+    
+    if cmd.lower() == "exit":
+        print("Exiting...")
+        break
+
+    output = s.recv(65536).decode()
+    print("\n----- RESULT -----")
+    print(output)
+    print("------------------\n")
+
+s.close()
+```
 
 ## Output
+![alt text](<Screenshot 2026-03-13 110413.png>)
+![alt text](</Screenshot 2026-03-13 110413.png>)
+![alt text](</Screenshot 2026-03-13 110440.png>)
+![alt text](</Screenshot 2026-03-13 110541.png>)
+![alt text](</Screenshot 2026-03-13 110654.png>)
+![alt text](</Screenshot 2026-03-13 110742.png>)
+![alt text](</Screenshot 2026-03-13 110756.png>)
+![alt text](</Screenshot 2026-03-13 110908.png>)
+![alt text](</Screenshot 2026-03-13 110943.png>)
+![alt text](</Screenshot 2026-03-13 111012.png>)
+![alt text](</Screenshot 2026-03-13 111034.png>)
+![alt text](</Screenshot 2026-03-13 111445.png>)
+
+
 
 ## Result
 Thus Execution of Network commands Performed 
